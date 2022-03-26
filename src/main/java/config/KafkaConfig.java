@@ -25,6 +25,10 @@ public class KafkaConfig {
         // 指定拦截器，甚至可以指定好几个拦截器，越排在后边儿的越先执行，形成一个调用链
         properties.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
                 PrefixProducerInterceptor02.class.getName() + "," + PrefixProducerInterceptor.class.getName());
+        // 指定发送消息缓冲区的大小 默认32MB
+        properties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432");
+        // send最长的阻塞时间 默认60s
+        properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, "60000");
 
         return properties;
     }
