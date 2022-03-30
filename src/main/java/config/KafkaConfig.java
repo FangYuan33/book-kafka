@@ -2,6 +2,7 @@ package config;
 
 import interceptor.PrefixProducerInterceptor;
 import interceptor.PrefixProducerInterceptor02;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -41,6 +42,15 @@ public class KafkaConfig {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
+
+        return properties;
+    }
+
+    public static Properties getAdminProperties() {
+        Properties properties = new Properties();
+
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
+        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
 
         return properties;
     }
