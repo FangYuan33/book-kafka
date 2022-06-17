@@ -1,5 +1,35 @@
 ##  图解 Kafka 之实战指南 学习笔记
 
+### chapter_02
+
+在远程Linux上配置
+```xml
+listeners=PLAINTEXT://内网IP:9092
+
+advertised.listeners=PLAINTEXT://外网IP:9092
+```
+
+创建分区为4副本因子为3的话题
+```
+bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic topic-demo --replication-factor 3 --partitions 4
+```
+
+展示主题的更多具体信息
+```
+bin/kafka-topics.sh --zookeeper localhost:2181 --describe --topic topic-demo
+```
+
+通过 kafka-console-consumer.sh 脚本来订阅主题 topic-demo 其中--bootstrap-server 指定了连接的 Kafka 集群地址
+```
+bin/kafka-console-consumer.sh --bootstrap-server 10.0.24.15:9092 --topic topic-demo
+```
+
+使用 kafka-console-producer.sh 脚本发送一条消息“Hello, Kafka!”至主题 topic-demo
+```
+bin/kafka-console-producer.sh --broker-list 10.0.24.15:9092 --topic topic-demo
+> hello Kafka!
+```
+
 ### chapter_01
 
 Kafka的三大角色
