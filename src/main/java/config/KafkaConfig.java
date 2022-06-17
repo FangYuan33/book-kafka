@@ -1,8 +1,5 @@
 package config;
 
-import interceptor.PrefixProducerInterceptor;
-import interceptor.PrefixProducerInterceptor02;
-import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -23,9 +20,6 @@ public class KafkaConfig {
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "producer.client.id.demo");
-        // 指定拦截器，甚至可以指定好几个拦截器，越排在后边儿的越先执行，形成一个调用链
-        properties.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
-                PrefixProducerInterceptor02.class.getName() + "," + PrefixProducerInterceptor.class.getName());
         // 指定发送消息缓冲区的大小 默认32MB
         properties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432");
         // send最长的阻塞时间 默认60s
@@ -46,12 +40,4 @@ public class KafkaConfig {
         return properties;
     }
 
-    public static Properties getAdminProperties() {
-        Properties properties = new Properties();
-
-        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
-        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
-
-        return properties;
-    }
 }
