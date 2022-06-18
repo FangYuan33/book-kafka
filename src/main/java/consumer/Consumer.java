@@ -5,6 +5,9 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.util.Collections;
 
+/**
+ * 消费者
+ */
 public class Consumer {
 
     private static final KafkaConsumer<String, String> consumer;

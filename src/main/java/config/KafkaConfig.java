@@ -7,8 +7,11 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
 
+/**
+ * Kafka配置
+ */
 public class KafkaConfig {
-    private static final String BROKER_LIST = "101.43.163.223:9092";
+    private static final String BROKER_LIST = "xxx:9092";
 
     private static final String GROUP_ID = "group.demo";
 

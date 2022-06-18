@@ -4,7 +4,6 @@ import consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -13,10 +12,12 @@ import producer.Producer;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 
-public class Test02 {
+public class KafkaApplication {
+    // 消息的发布者
     public static void main(String[] args) {
         KafkaProducer<String, String> producer = Producer.getProducer();
 
+        // 发送的内容
         ProducerRecord<String, String> record = new ProducerRecord<>("topic-demo", "hello, Kafka");
 
         try {
@@ -38,7 +39,11 @@ public class Test02 {
         }
     }
 }
-class ConsumerClient02 {
+
+/**
+ * 消费者
+ */
+class ConsumerApplication {
     public static void main(String[] args) {
         KafkaConsumer<String, String> consumer = Consumer.getConsumer("topic-demo");
 
