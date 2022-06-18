@@ -17,21 +17,21 @@ Kafka的三大角色
 1. kafka集群包含一个或多个服务器，而每个服务器可以简单的被称为broker，生产者producer和消费者consumer是broker的客户端。
    一个典型的Kafka体系包含若干producer、若干broker和若干consumer，producer发送消息到broker，consumer拉取消息进行消费，如下图所示
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/187e1e38c0d640649bbbc97a19d6b091.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5pa55ZyG5oOz5b2T5Zu-54G1,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center)
+![img.png](image/chapter_01/img_4.png)
 
 2. kafka中有主题和分区的概念。Kafka中的消息是以主题为单位进行归类的，生产者负责将消息发送到具体的主题，消费者负责订阅主题并进行消费。
    每一个主题可以分为多个分区（也可以称为是主题分区），分区其实在存储层面对应的是一个log文件，文件中会记录偏移量（offset）来保证消息在分区内的顺序。
    如下图所示，一个主题有三个分区，消息会被追加到每个分区的log文件的尾部。每一条消息被发送到broker之前，会根据分区规则存储到具体的分区，
    如果主题只有一个分区的话，那么这个文件在服务器上的log文件I/O将成为性能的瓶颈，合理指定分区数则能解决这个问题。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/6c306798856b4e868a10c2442724f463.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5pa55ZyG5oOz5b2T5Zu-54G1,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center)
+![img_1.png](image/chapter_01/img_3.png)
 
 3. 分区可以分布在不同的broker上，也就是说，一个主题的多个分区可以横跨多个broker。同时kafka的分区具有多副本机制，通过增加副本的数量来增加容灾能力。
    同一个分区的不同副本中保存的是相同的消息（follower副本完成消息同步之后），副本与副本之间是一主多从的关系，其中只有leader副本负责读写，
    而follower副本只负责从leader副本处进行消息同步。如下图所示，一个主题有三个分区，副本因子也为三（即每个分区的副本个数为三，
    那么每个分区就有一个leader副本和两个follower副本），均匀的分布在三个broker上。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/5f3914ca92ff47b480b6563d5cddad73.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5pa55ZyG5oOz5b2T5Zu-54G1,size_18,color_FFFFFF,t_70,g_se,x_16#pic_center)
+![img_2.png](image/chapter_01/img_2.png)
 
 4. 当leader副本出现故障时，会从follower中选举出新的leader副本来对外提供服务。分区中的所有副本统称为AR，
    所有与leader副本保持同步的副本被称为ISR，与leader副本同步滞后的被称为OSR。
