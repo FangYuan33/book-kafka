@@ -1,5 +1,10 @@
 ##  图解 Kafka 之实战指南 学习笔记
 
+### chapter_04
+- 序列化器: 生产者需要用序列化器（Serializer）把对象转换成字节数组才能通过网络发送给 Kafka。
+而在对侧，消费者需要用反序列化器（Deserializer）把从 Kafka 中收到的字节数组转换成相应的对象
+
+
 ### chapter_03
 
 配置信息以KafkaConfig类中注释为准，包括key, value的序列化和反序列化; 集群地址; 客户端ID; 消息发送阻塞时间和重试次数
