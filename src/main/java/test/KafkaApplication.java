@@ -13,30 +13,19 @@ import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 
 public class KafkaApplication {
-    // 消息的发布者
+    /**
+     * 消息发布测试
+     */
     public static void main(String[] args) {
-        KafkaProducer<String, String> producer = Producer.getProducer();
+        Producer<String, String> producer = new Producer<>();
 
-        // 发送的内容
-        ProducerRecord<String, String> record = new ProducerRecord<>("topic-demo", "hello, Kafka");
+        ProducerRecord<String, String> record = new ProducerRecord<>("topic-demo", "sync! Hello!");
+        // 同步发送消息
+        producer.syncSendMessage(record);
 
-        try {
-            // send方法本身是异步的，不过调用get方法后可以使Future对象阻塞，直到响应成功
-            RecordMetadata recordMetadata = producer.send(record).get();
-            System.out.println(recordMetadata.toString());
-
-            producer.send(record, (metadata, exception) -> {
-                if (exception != null) {
-                    exception.printStackTrace();
-                } else {
-                    System.out.println("callBack" + metadata.toString());
-                }
-            });
-
-            producer.close();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        ProducerRecord<String, String> record2 = new ProducerRecord<>("topic-demo", "async! Hello!");
+        // 异步发送消息
+        producer.asyncSendMessage(record2);
     }
 }
 

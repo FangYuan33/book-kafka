@@ -1,5 +1,16 @@
 ##  图解 Kafka 之实战指南 学习笔记
 
+### chapter_03
+
+配置信息以KafkaConfig类中注释为准，包括key, value的序列化和反序列化; 集群地址; 客户端ID; 消息发送阻塞时间和重试次数
+
+Kafka消息对象
+![](ProducerRecord.png)
+
+分别写了同步发送和异步发送消息的方法，其中同步是采用Future的get阻塞调用，异步是添加了回调方法处理的
+
+注意close()方法是在阻塞等待之前所有的发送请求完成后再关闭
+
 ### chapter_02
 
 在远程Linux上配置
