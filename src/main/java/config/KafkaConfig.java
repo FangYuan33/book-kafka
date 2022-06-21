@@ -1,6 +1,7 @@
 package config;
 
 import config.deserializer.CompanyDeserializer;
+import config.interceptor.MyProducerInterceptor;
 import config.partitioner.MyPartitioner;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -37,6 +38,8 @@ public class KafkaConfig {
 
         // 配置分区器
         properties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, MyPartitioner.class.getName());
+        // 生产者拦截器
+        properties.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, MyProducerInterceptor.class.getName());
 
         return properties;
     }

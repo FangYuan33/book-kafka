@@ -9,6 +9,8 @@
 
 - 分区器: 消息经过序列化之后就需要确定它发往的分区，如果消息 ProducerRecord 中指定了 partition 字段，那么就不需要分区器的作用(自己写了一个简单分区器)
 
+- 生产者拦截器: 注意看一下MyProducerInterceptor的方法注释
+
 ### chapter_03
 
 配置信息以KafkaConfig类中注释为准，包括key, value的序列化和反序列化; 集群地址; 客户端ID; 消息发送阻塞时间和重试次数
