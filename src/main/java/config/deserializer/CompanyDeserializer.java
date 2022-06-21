@@ -1,4 +1,4 @@
-package deserializer;
+package config.deserializer;
 
 import com.alibaba.fastjson.JSONObject;
 import domain.Company;

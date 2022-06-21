@@ -1,9 +1,13 @@
 ##  图解 Kafka 之实战指南 学习笔记
 
 ### chapter_04
-- 序列化器: 生产者需要用序列化器（Serializer）把对象转换成字节数组才能通过网络发送给 Kafka。
+消息在通过 send() 方法发往 broker 的过程中，有可能需要经过拦截器（Interceptor）、序列化器（Serializer）和
+分区器（Partitioner）的一系列作用之后才能被真正地发往 broker。
+
+- 序列化器和反序列化器: 生产者需要用序列化器（Serializer）把对象转换成字节数组才能通过网络发送给 Kafka。
 而在对侧，消费者需要用反序列化器（Deserializer）把从 Kafka 中收到的字节数组转换成相应的对象
 
+- 分区器: 消息经过序列化之后就需要确定它发往的分区，如果消息 ProducerRecord 中指定了 partition 字段，那么就不需要分区器的作用(自己写了一个简单分区器)
 
 ### chapter_03
 

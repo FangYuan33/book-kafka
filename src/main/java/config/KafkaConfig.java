@@ -1,11 +1,12 @@
 package config;
 
-import deserializer.CompanyDeserializer;
+import config.deserializer.CompanyDeserializer;
+import config.partitioner.MyPartitioner;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import serializer.CompanySerializer;
+import config.serializer.CompanySerializer;
 
 import java.util.Properties;
 
@@ -33,6 +34,9 @@ public class KafkaConfig {
         properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, "60000");
         // 消息发送重试次数，有些异常可以通过重试来解决，比如NetworkException，但是像RecordTooLargeException异常就不能通过重试解决
         properties.put(ProducerConfig.RETRIES_CONFIG, 10);
+
+        // 配置分区器
+        properties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, MyPartitioner.class.getName());
 
         return properties;
     }

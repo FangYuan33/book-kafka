@@ -1,4 +1,4 @@
-package serializer;
+package config.serializer;
 
 import com.alibaba.fastjson.JSON;
 import domain.Company;
