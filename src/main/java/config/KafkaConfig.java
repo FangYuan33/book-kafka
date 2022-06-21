@@ -29,7 +29,7 @@ public class KafkaConfig {
         // 用来设定 KafkaProducer 对应的客户端id
         // 如果客户端不设置，则 KafkaProducer 会自动生成一个非空字符串，内容形式如“producer-1”、“producer-2”
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "producer.client.id.demo");
-        // 指定发送消息缓冲区的大小 默认32MB
+        // 指定发送消息RecordAccumulator缓冲区的大小 默认32MB
         properties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432");
         // send最长的阻塞时间 默认60s
         properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, "60000");
