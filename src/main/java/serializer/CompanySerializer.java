@@ -1,10 +1,10 @@
 package serializer;
 
+import com.alibaba.fastjson.JSON;
 import domain.Company;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serializer;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -21,32 +21,12 @@ public class CompanySerializer implements Serializer<Company> {
 
     @Override
     public byte[] serialize(String topic, Company data) {
-        if (data == null) {
-            return null;
-        }
-
-        byte[] name, address;
-
         try {
-            if (data.getName() != null) {
-                name = data.getName().getBytes(StandardCharsets.UTF_8);
-            } else {
-                name = new byte[0];
+            if (data == null) {
+                return null;
             }
 
-            if (data.getAddress() != null) {
-                address = data.getAddress().getBytes(StandardCharsets.UTF_8);
-            } else {
-                address = new byte[0];
-            }
-            // 两个4代表两次putInt 每个int 4个字节
-            ByteBuffer result = ByteBuffer.allocate(4 + 4 + name.length + address.length);
-            result.putInt(name.length);
-            result.put(name);
-            result.putInt(address.length);
-            result.put(address);
-
-            return result.array();
+            return JSON.toJSONString(data).getBytes(StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
         }

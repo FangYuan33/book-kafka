@@ -2,9 +2,9 @@ package test;
 
 import consumer.Consumer;
 import domain.Company;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import producer.Producer;
 
@@ -29,15 +29,16 @@ public class KafkaApplication {
 /**
  * 消费者
  */
+@Slf4j
 class ConsumerApplication {
     public static void main(String[] args) {
-        KafkaConsumer<String, String> consumer = Consumer.getConsumer("topic-demo");
+        Consumer<String, Company> consumer = new Consumer<>("topic-demo");
 
         // 循环消费消息
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
+            ConsumerRecords<String, Company> records = consumer.poll(Duration.ofMillis(100));
 
-            for (ConsumerRecord<String, String> record : records) {
+            for (ConsumerRecord<String, Company> record : records) {
                 System.out.println(record.value());
             }
         }
