@@ -42,8 +42,8 @@ ProducerRecord 是生产者中创建的消息，而 ProducerBatch 是指一个�
 
 ![](sender.jpg)
 
-Sender 从 RecordAccumulator 中获取缓存的消息之后，会进行如上图所示的数据类型转换，由先前的<分区, Deque<ProducerBatch>>类型转换成
-<Node, List< ProducerBatch>>类型，其中Node为broker节点，相当于是做了从应用层到网络I/O层的转换，因为对于网络链接来说，它只关系需要
+Sender 从 RecordAccumulator 中获取缓存的消息之后，会进行如上图所示的数据类型转换，由先前的`<分区, Deque<ProducerBatch>>`类型转换成
+`<Node, List< ProducerBatch>>`类型，其中Node为broker节点，相当于是做了从应用层到网络I/O层的转换，因为对于网络链接来说，它只关系需要
 发送的目的broker节点，并不关心应用层消息所在的分区。
 
 ![](sender2.jpg)
@@ -52,7 +52,7 @@ Sender之后还会对他进行一次封装，封装成<Node, Request>的形式�
 
 ![img_2.png](img_2.png)
 
-请求在从 Sender 线程发往 Kafka 之前还会保存到 InFlightRequests 中，InFlightRequests 保存对象的具体形式为 Map<NodeId, Deque<InFlightRequest>>，
+请求在从 Sender 线程发往 Kafka 之前还会保存到 InFlightRequests 中，InFlightRequests 保存对象的具体形式为 `Map<NodeId, Deque<InFlightRequest>>`，
 它的主要作用是缓存了已经发出去但还没有收到响应的请求（NodeId 是一个 String 类型，表示节点的 id 编号）
 
 对应的InFlightRequests注释
