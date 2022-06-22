@@ -73,7 +73,7 @@ Sender之后还会对他进行一次封装，封装成<Node, Request>的形式�
 ```java
 ProducerRecord<String, String> record = new ProducerRecord<>(topic, "Hello, Kafka!");
 ```
-而实际上KafkaProducer需要将这条消息追加到**指定主题的所在的某个分区的leader副本**之下，因此我们就需要获取到**“足够多的元数据信息”**来达到这一点。
+而实际上KafkaProducer需要将这条消息追加到**指定主题的所在的某个分区的leader副本**之下，因此我们就需要获取到 **“足够多的元数据信息”** 来达到这一点。
 
 元数据都包含了啥呢？集群中用哪些节点、有哪些主题，这些主题有哪些分区，
 每个分区的leader副本在哪个broker节点上，follower副本在哪些节点上，哪些副本在AR、ISR等集合中...
