@@ -4,7 +4,7 @@
 
 - 生产者客户端的整体架构
 
-![img.png](img.png)
+![img.png](image/chapter_05/img.png)
 
 整个生产者客户端由两个线程协调运行，这两个线程分别为主线程和 Sender 线程（发送线程）。在主线程中由 KafkaProducer 创建消息，
 然后通过可能的拦截器、序列化器和分区器的作用之后缓存到消息累加器（RecordAccumulator，也称为消息收集器）中。
@@ -16,11 +16,11 @@ RecordAccumulator 主要用来缓存消息以便 Sender 线程可以批量发送
 如果生产者发送消息的速度超过发送到服务器的速度，则会导致生产者空间不足，这个时候 KafkaProducer 的 send() 方法调用要么被阻塞，
 要么抛出异常，这个取决于参数 max.block.ms 的配置，此参数的默认值为60000，即60秒。
 
-![img_1.png](img_1.png)
+![img_1.png](image/chapter_05/img_1.png)
 
 在 RecordAccumulator 的内部为每个分区都维护了一个双端队列，队列中的内容是ProducerBatch，消息写入缓存时，追加到双端队列的尾部；Sender 读取消息时，从双端队列的头部读取。
 
-![](ProducerBatch.jpg)
+![](image/chapter_05/ProducerBatch.jpg)
 
 ProducerBatch 中可以包含一至多个 ProducerRecord，
 ProducerRecord 是生产者中创建的消息，而 ProducerBatch 是指一个消息批次，ProducerRecord 会被包含在 ProducerBatch 中，
@@ -40,17 +40,17 @@ ProducerRecord 是生产者中创建的消息，而 ProducerBatch 是指一个�
 如果不超过，那么就以 batch.size 参数的大小来创建 ProducerBatch，这样在使用完这段内存区域之后，可以通过 BufferPool 的管理来进行复用；
 如果超过，那么就以评估的大小来创建 ProducerBatch，这段内存区域不会被复用。
 
-![](sender.jpg)
+![](image/chapter_05/sender.jpg)
 
 Sender 从 RecordAccumulator 中获取缓存的消息之后，会进行如上图所示的数据类型转换，由先前的<分区, Deque<ProducerBatch>>类型转换成
 <Node, List< ProducerBatch>>类型，其中Node为broker节点，相当于是做了从应用层到网络I/O层的转换，因为对于网络链接来说，它只关系需要
 发送的目的broker节点，并不关心应用层消息所在的分区。
 
-![](sender2.jpg)
+![](image/chapter_05/sender2.jpg)
 
 Sender之后还会对他进行一次封装，封装成<Node, Request>的形式，这样就更直观的展示了将Request发往各个Node的逻辑。
 
-![img_2.png](img_2.png)
+![img_2.png](image/chapter_05/img_2.png)
 
 请求在从 Sender 线程发往 Kafka 之前还会保存到 InFlightRequests 中，InFlightRequests 保存对象的具体形式为 Map<NodeId, Deque<InFlightRequest>>，
 它的主要作用是缓存了已经发出去但还没有收到响应的请求（NodeId 是一个 String 类型，表示节点的 id 编号）
@@ -59,6 +59,29 @@ Sender之后还会对他进行一次封装，封装成<Node, Request>的形式�
 > The set of requests which have been sent or are being sent but haven't yet received a response
 
 通过配置max.in.flight.requests. per. connection，默认为5，可以配置最多缓存的请求数。如果超过了这个数量，就不能再向这个连接发送更多的请求了。
+
+---
+- 元数据的更新
+
+![img_3.png](image/chapter_05/img_3.png)
+
+在`InFlightRequests`中还能获取到`leastLoadedNode`，即未确认请求数最少的Node。那么选择该Node发送请求则可以尽快发出，这个特性可以应用在元数据请求时。
+
+为什么要更新元数据？
+
+比如我们要发送这条消息，但是这条消息除了知道主题以外，其他信息一概不知。
+```java
+ProducerRecord<String, String> record = new ProducerRecord<>(topic, "Hello, Kafka!");
+```
+而实际上KafkaProducer需要将这条消息追加到**指定主题的所在的某个分区的leader副本**之下，因此我们就需要获取到**“足够多的元数据信息”**来达到这一点。
+
+元数据都包含了啥呢？集群中用哪些节点、有哪些主题，这些主题有哪些分区，
+每个分区的leader副本在哪个broker节点上，follower副本在哪些节点上，哪些副本在AR、ISR等集合中...
+
+那该如何获取这些元数据呢？
+
+我们在bootstrap.servers 参数上配置了broker节点地址，Sender线程会挑选出`leastLoadedNode`发送向其获取元数据的请求，这个过程是在客户端内部进行的，
+对使用者不可见，请求完成后便会获取到需要的元数据信息。超过 `metadata.max.age.ms` 时间没有更新元数据都会引起元数据的更新操作，默认为5分钟
 
 ### chapter_04
 消息在通过 send() 方法发往 broker 的过程中，有可能需要经过拦截器（Interceptor）、序列化器（Serializer）和
