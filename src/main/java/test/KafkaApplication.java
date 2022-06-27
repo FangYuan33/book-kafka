@@ -7,10 +7,13 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.TopicPartition;
 import producer.Producer;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class KafkaApplication {
     /**
@@ -22,8 +25,8 @@ public class KafkaApplication {
         Company company = new Company();
         company.setName("JD");
         company.setAddress("BJ");
-        // 指定分区发送
-        ProducerRecord<String, Company> message = new ProducerRecord<>("topic-demo", 1, null, company);
+
+        ProducerRecord<String, Company> message = new ProducerRecord<>("topic-demo", company);
 
         producer.syncSendMessage(message);
     }
@@ -46,10 +49,29 @@ class ConsumerApplication {
         while (true) {
             ConsumerRecords<String, Company> records = consumer.poll(Duration.ofMillis(100));
 
-            for (ConsumerRecord<String, Company> record : records) {
-                log.info("Topic: {}, Partition: {}, Offset: {}, key: {}, value: {}",
-                        record.topic(), record.partition(), record.offset(), record.key(), record.value());
+            // 获取消息的所有分区
+            Set<TopicPartition> partitions = records.partitions();
+
+            // 根据分区获取该分区下所有的消息
+            for (TopicPartition partition : partitions) {
+                List<ConsumerRecord<String, Company>> recordList = records.records(partition);
+
+                for (ConsumerRecord<String, Company> record : recordList) {
+                    log.info("Partition: {}, Value: {}", partition.partition(), record.value());
+                }
             }
+
+            // 根据话题来消费消息
+            List<String> topicList = Collections.singletonList("topic-demo");
+
+            for (String topic : topicList) {
+                Iterable<ConsumerRecord<String, Company>> iterable = records.records(topic);
+
+                for (ConsumerRecord<String, Company> record : iterable) {
+                    log.info("Topic: {}, Value: {}", topic, record.value());
+                }
+            }
+
         }
 
         // 取消订阅
