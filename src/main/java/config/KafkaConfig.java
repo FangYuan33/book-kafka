@@ -52,6 +52,8 @@ public class KafkaConfig {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CompanyDeserializer.class.getName());
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
+        // 配置客户端ID
+        properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "JD-Consumer");
 
         return properties;
     }
