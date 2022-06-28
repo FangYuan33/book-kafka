@@ -3,6 +3,7 @@ package consumer;
 import config.KafkaConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 
@@ -20,11 +21,11 @@ public class Consumer<K, V> {
 
     public Consumer(String topic) {
         // consumer只能调用一次这个订阅方法，如果之后再调用，则以后调用的订阅内容为准
-        consumer.subscribe(Collections.singletonList(topic));
+//        consumer.subscribe(Collections.singletonList(topic));
         // 正则表达式匹配
 //        consumer.subscribe(Pattern.compile("topic-*"));
         // 指定分区1的订阅方法
-//        consumer.assign(Collections.singletonList(new TopicPartition("topic-demo", 1)));
+        consumer.assign(Collections.singletonList(new TopicPartition("topic-demo", 1)));
     }
 
     public ConsumerRecords<K, V> poll(Duration duration) {
@@ -36,6 +37,27 @@ public class Consumer<K, V> {
      */
     public List<PartitionInfo> partitionsFor(String topic) {
         return consumer.partitionsFor(topic);
+    }
+
+    /**
+     * 同步提交消费位移
+     */
+    public void commitSync() {
+        consumer.commitSync();
+    }
+
+    /**
+     * 获取指定分区的最新消费位移
+     */
+    public OffsetAndMetadata committed(TopicPartition topicPartition) {
+        return consumer.committed(topicPartition);
+    }
+
+    /**
+     * 获取下一条需要消费的消息的位移
+     */
+    public long position(TopicPartition topicPartition) {
+        return consumer.position(topicPartition);
     }
 
     /**
