@@ -10,7 +10,7 @@
 如果没有持久化消费位移，那么这个新的消费者也没办法知道该从哪里进行消费。
 
 如果我们定义x为`consumedOffset`，那么提交位移为`committedOffset`，还有一个位移值得注意，那就是调用position方法获取的`拉取下一条消费的位移`
-`nextMessageOffset`，它在我们的例子中和committed是相等的。
+，为`nextMessageOffset`，它在我们的例子中和`committedOffset`是相等的。
 
 Kafka默认的位移提交方式是自动提交，由`enable.auto.commit`配置，提交的周期是由`auto.commit.interval.ms`配置，默认周期是5秒，
 也就是说它会每隔5秒拉取到每个分区中最大的消息位移，但是它的提交动作是在poll()方法逻辑里，在每次向服务端拉取请求之前会检查是否可以进行位移提交。
