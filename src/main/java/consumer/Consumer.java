@@ -6,11 +6,13 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.internals.Topic;
 
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -65,6 +67,36 @@ public class Consumer<K, V> {
     }
 
     /**
+     * 暂停分区消费
+     */
+    public void pause(TopicPartition topicPartition) {
+        consumer.pause(Collections.singleton(topicPartition));
+    }
+
+    /**
+     * 恢复指定分区消费
+     */
+    public void resume(TopicPartition topicPartition) {
+        consumer.resume(Collections.singleton(topicPartition));
+    }
+
+    /**
+     * 获取所有暂停消费的分区
+     */
+    public Set<TopicPartition> paused() {
+        return consumer.paused();
+    }
+
+    /**
+     * 调用 wakeup() 方法后可以退出 poll() 的逻辑，并抛出 WakeupException 的异常
+     *
+     * 唯一可以从其他线程里安全调用的方法
+     */
+    public void wakeup() {
+        consumer.wakeup();
+    }
+
+    /**
      * 获取指定分区的最新消费位移
      */
     public OffsetAndMetadata committed(TopicPartition topicPartition) {
@@ -83,5 +115,12 @@ public class Consumer<K, V> {
      */
     public void unsubscribe() {
         consumer.unsubscribe();
+    }
+
+    /**
+     * 关闭消费者客户端
+     */
+    public void close() {
+        consumer.close();
     }
 }
