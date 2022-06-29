@@ -10,6 +10,7 @@ import org.apache.kafka.common.TopicPartition;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -44,6 +45,23 @@ public class Consumer<K, V> {
      */
     public void commitSync() {
         consumer.commitSync();
+    }
+
+    /**
+     * 提交特定话题特定分区的消费位移，但是一般不会消费完一条就调用一次这个方法
+     */
+    public void commitSync(Map<TopicPartition, OffsetAndMetadata> offsets) {
+        consumer.commitSync(offsets);
+    }
+
+    /**
+     * 异步提交
+     */
+    public void commitAsync() {
+        consumer.commitAsync((offsets, exception) -> {
+            // 异步提交的回调方法
+
+        });
     }
 
     /**

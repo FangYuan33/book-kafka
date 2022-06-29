@@ -12,6 +12,7 @@ import org.apache.kafka.common.TopicPartition;
 import producer.Producer;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 
 public class KafkaApplication {
@@ -59,9 +60,19 @@ class ConsumerApplication {
 
             for (ConsumerRecord<String, Company> record : records) {
                 lastConsumeOffset = record.offset();
+
+                log.info("---处理业务逻辑---, {}", record.value());
             }
             // 同步提交消费位移
             consumer.commitSync();
+            // 异步提交
+//            consumer.commitAsync();
+
+            // 特定分区和对应的消费位移 key - value
+            TopicPartition topicPartition = new TopicPartition("topic-demo", 1);
+            OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(lastConsumeOffset + 1);
+            // 细粒度同步提交
+            consumer.commitSync(Collections.singletonMap(topicPartition, offsetAndMetadata));
         }
         log.info("LastConsumeOffset: {}", lastConsumeOffset);
         // 获取指定分区的最新提交的消费位移
