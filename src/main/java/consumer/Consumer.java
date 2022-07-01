@@ -20,6 +20,13 @@ import java.util.regex.Pattern;
  */
 public class Consumer<K, V> {
 
+    /**
+     * 还是开放出来一个consumer供自己用吧
+     */
+    public KafkaConsumer<K, V> getConsumer() {
+        return consumer;
+    }
+
     private final KafkaConsumer<K, V> consumer = new KafkaConsumer<>(KafkaConfig.getConsumerProperties());
 
     public Consumer(String topic) {

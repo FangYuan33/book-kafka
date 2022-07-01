@@ -1,13 +1,31 @@
 ##  [《图解 Kafka 之实战指南》](https://s.juejin.cn/ds/YsX42xu/) ，点击查看原书
 
-### chapter_12
+### chapter_12 指定位移消费
 
 在 Kafka 中每当消费者查找不到记录的消费位移时，就会根据消费者客户端参数 **auto.offset.reset** 的配置来决定从何处开始进行消费，
 这个参数的默认值为`latest`，表示从分区末尾开始消费消息，如下图所示，默认从9开始拉取消息进行消费，如果配置成`earliest`，那么从0开始消费
 
 ![img.png](img.png)
 
+相反，如果能找到对应的消费位移，那么这个配置就没啥用。或者当我们指定的消费位移超出了该分区的位移范围，这个参数也会生效。
 
+我们可以使用`seek方法`来对指定分分区具体的位移处的消息进行消费。
+
+`Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions)` 获取到的位置不是上图中的8而是9
+
+`Map<TopicPartition, Long> beginningOffsets(Collection<TopicPartition> partitions)` 获取消息开始的位置
+
+通过如上两个方法，可以根据获取到的每个分区的偏移量来选择从分区头还是从分区尾进行消费，或者更直接的选择`seekToBeginning`和`seekToEnd`方法。
+
+---
+
+当然还有一种更加符合业务逻辑的指定位移消费的方式
+
+`Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes(Map<TopicPartition, Long> timestampsToSearch)`
+
+可以通过这个方法来获取到指定分区的对应时间戳的消费位移，获取到消费位移后，再调用seek方法，便可以消费具体时间的处的消费位移的消息了
+
+到这里我们可以知道，只要有了消费位移那么我们就可以`随意`消费消息，如果我们把对应的消费位移保存到数据库或者缓存中，那么灵活性和可用性就高的多了！
 
 ### chapter_11
 
