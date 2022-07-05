@@ -1,6 +1,7 @@
 package consumer;
 
 import config.KafkaConfig;
+import config.rebalance.MyRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -31,7 +32,7 @@ public class Consumer<K, V> {
 
     public Consumer(String topic) {
         // consumer只能调用一次这个订阅方法，如果之后再调用，则以后调用的订阅内容为准
-        consumer.subscribe(Collections.singletonList(topic));
+        consumer.subscribe(Collections.singletonList(topic), new MyRebalanceListener<K, V>(consumer));
         // 正则表达式匹配
 //        consumer.subscribe(Pattern.compile("topic-*"));
         // 指定分区1的订阅方法

@@ -53,7 +53,7 @@ public class KafkaConfig {
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
         // 配置客户端ID
-        properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "JD-Consumer-2");
+//        properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "JD-Consumer-2");
         // 配置消费位移不自动提交
 //        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         // 配置找不到消费位移时从哪里开始消费

@@ -24,9 +24,29 @@ public class KafkaApplication {
         company.setName("JD");
         company.setAddress("BJ");
 
-        ProducerRecord<String, Company> message = new ProducerRecord<>("topic-demo", 1, null, company);
+        ProducerRecord<String, Company> message = new ProducerRecord<>("topic-demo", company);
 
         producer.syncSendMessage(message);
+    }
+}
+
+/**
+ * 2号消费者
+ */
+@Slf4j
+class ConsumerApplication2 {
+    public static void main(String[] args) {
+        Consumer<String, Company> consumer = new Consumer<>("topic-demo");
+
+        KafkaConsumer<String, Company> realConsumer = consumer.getConsumer();
+
+        while (true) {
+            ConsumerRecords<String, Company> records = realConsumer.poll(Duration.ofSeconds(1));
+
+            for (ConsumerRecord<String, Company> record : records) {
+                log.info("Consumer2 consume: {}, partition {}", record.value(), record.partition());
+            }
+        }
     }
 }
 
@@ -58,7 +78,11 @@ class ConsumerApplication {
             for (ConsumerRecord<String, Company> record : records) {
                 log.info("---处理业务逻辑---, {}, partition: {}", record.value(), record.partition());
             }
+
+            break;
         }
+
+        realConsumer.close();
     }
 
     /**
