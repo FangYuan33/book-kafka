@@ -27,7 +27,7 @@ public class MyProducerInterceptor<K, V> implements ProducerInterceptor<K, V> {
     public ProducerRecord<K, V> onSend(ProducerRecord<K, V> record) {
         if (record.value() instanceof Company) {
             Company value = (Company) record.value();
-            if (value != null && value.getName().equals("JD")) {
+            if (value != null && "JD".equals(value.getName())) {
                 value.setName("Dog D?");
             }
         }

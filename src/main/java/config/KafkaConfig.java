@@ -1,6 +1,7 @@
 package config;
 
 import config.deserializer.CompanyDeserializer;
+import config.interceptor.MyConsumerInterceptor;
 import config.interceptor.MyProducerInterceptor;
 import config.partitioner.MyPartitioner;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -58,6 +59,8 @@ public class KafkaConfig {
 //        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         // 配置找不到消费位移时从哪里开始消费
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        // 配置消费者拦截器
+        properties.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, MyConsumerInterceptor.class.getName());
 
         return properties;
     }

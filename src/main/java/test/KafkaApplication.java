@@ -24,9 +24,26 @@ public class KafkaApplication {
         company.setName("JD");
         company.setAddress("BJ");
 
-        ProducerRecord<String, Company> message = new ProducerRecord<>("topic-demo", company);
+        Company company1 = new Company();
+        company.setName("Shoppee");
+        company.setAddress("BJ");
+
+        Company company2 = new Company();
+        company.setName("SHEIN");
+        company.setAddress("BJ");
+
+        ProducerRecord<String, Company> message = new ProducerRecord<>("topic-demo", 1,
+                System.currentTimeMillis() - 10000, null, company);
+
+        ProducerRecord<String, Company> message1 = new ProducerRecord<>("topic-demo", 1,
+                System.currentTimeMillis(), null, company1);
+
+        ProducerRecord<String, Company> message2 = new ProducerRecord<>("topic-demo", 1,
+                System.currentTimeMillis() + 10000, null, company2);
 
         producer.syncSendMessage(message);
+        producer.syncSendMessage(message1);
+        producer.syncSendMessage(message2);
     }
 }
 
