@@ -33,7 +33,7 @@ public class Producer<K, V> {
         }
 
         // close()方法会阻塞等待之前所有的发送请求完成后再关闭 KafkaProducer
-        producer.close();
+//        producer.close();
     }
 
     /**

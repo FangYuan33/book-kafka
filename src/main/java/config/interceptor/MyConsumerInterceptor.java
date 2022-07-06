@@ -56,8 +56,8 @@ public class MyConsumerInterceptor<K, V> implements ConsumerInterceptor<K, V> {
         for (TopicPartition topicPartition : offsets.keySet()) {
             OffsetAndMetadata metadata = offsets.get(topicPartition);
 
-            log.info("Topic: {}, partition: {}, offset: {}",
-                    topicPartition.topic(), topicPartition.partition(), metadata.offset());
+//            log.info("Topic: {}, partition: {}, offset: {}",
+//                    topicPartition.topic(), topicPartition.partition(), metadata.offset());
         }
     }
 

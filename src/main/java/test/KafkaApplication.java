@@ -25,20 +25,20 @@ public class KafkaApplication {
         company.setAddress("BJ");
 
         Company company1 = new Company();
-        company.setName("Shoppee");
-        company.setAddress("BJ");
+        company1.setName("Shoppee");
+        company1.setAddress("BJ");
 
         Company company2 = new Company();
-        company.setName("SHEIN");
-        company.setAddress("BJ");
+        company2.setName("SHEIN");
+        company2.setAddress("BJ");
 
         ProducerRecord<String, Company> message = new ProducerRecord<>("topic-demo", 1,
                 System.currentTimeMillis() - 10000, null, company);
 
-        ProducerRecord<String, Company> message1 = new ProducerRecord<>("topic-demo", 1,
+        ProducerRecord<String, Company> message1 = new ProducerRecord<>("topic-demo", 2,
                 System.currentTimeMillis(), null, company1);
 
-        ProducerRecord<String, Company> message2 = new ProducerRecord<>("topic-demo", 1,
+        ProducerRecord<String, Company> message2 = new ProducerRecord<>("topic-demo", 3,
                 System.currentTimeMillis() + 10000, null, company2);
 
         producer.syncSendMessage(message);
