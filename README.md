@@ -1,5 +1,43 @@
 ##  [《图解 Kafka 之实战指南》](https://s.juejin.cn/ds/YsX42xu/) ，点击查看原书
 
+### chapter_15 重要的消费者参数
+
+1. **fetch.min.bytes**: 配置 Consumer 在调用`poll()方法`中能从 `broker` 中拉取的最小数据量，默认值为1（B）。
+   `broker` 在收到 Consumer 的拉取请求时，如果返回给 Consumer 的数据量小于这个参数所配置的值，那么它就需要进行等待，
+   直到数据量满足这个参数的配置大小。可以适当调大这个参数的值以提高一定的吞吐量，不过也会造成额外的延迟（latency），
+   对于延迟敏感的应用可能就不可取了。
+
+2. **fetch.max.bytes**: 用来配置 Consumer 在一次拉取请求中从Kafka中拉取的最大数据量，默认值为52428800（B），也就是50MB。
+   如果这个参数设置的值比任何一条写入 Kafka 中的消息要小且它是第一个非空分区中拉取的第一条消息的话，它是不会被认为无法消费，这条消息仍然会正常返回。
+   
+3. **fetch.max.wait.ms**: 与**fetch.min.bytes**参数有关，为了满足拉取的数据量的最小值，但是也不能无限时长等待，默认500ms，
+   超过这个时间之后，数据量不满足最小值也会响应
+   
+4. **max.partition.fetch.bytes**: 这个参数和**fetch.max.bytes**相似，它用来限制的是一次拉取每个分区的消息大小，
+   同样为了保证Kafka的正常，也并不会严格限制大小造成无法消费的情况
+   
+5. **max.poll.records**: 配置 Consumer 在一次拉取请求中拉取的最大消息数，默认值为500（条）
+
+6. **connections.max.idle.ms**: 用来指定在多久之后关闭闲置的连接，默认值是540000（ms），即9分钟
+
+7. **exclude.internal.topics**: 指定内部主题（ `__consumer_offsets` 和 `__transaction_state`）的消费方式，
+   默认为true，这种情况必须使用`subscribe(Collection)`的方式消费， 改成false时，内部主题就像变成了公开主题一样，怎么订阅都行了
+   
+8. **receive.buffer.bytes**: 配置Socket接收消息缓冲区大小，默认为65536（B），如果设置为-1，则为系统默认值
+
+9. **request.timeout.ms**: 配置 Consumer 等待请求响应的最长时间，默认值为30000ms
+
+10. **metadata.max.age.ms**: 配置元数据的过期时间，默认值为300000ms，过期后强制更新
+
+11. **reconnect.backoff.ms**: 配置尝试重新连接指定主机之前的等待时间，避免频繁地连接主机，默认值为50ms
+
+12. **retry.backoff.ms**: 配置尝试重新发送失败的请求到指定的主题分区之前的等待，默认100ms
+
+13. **isolation.level**: 配置消费者的事务隔离级别，`read_committed`消费者就会忽略事务未提交的消息，即只能消费到LSO，
+    默认情况下为`read_uncommitted`，即可以消费到HW处的位置
+
+- 其他参数参考`getConsumerProperties()`方法
+
 ### chapter_14 消费者的多线程实现
 
 一般而言，**分区是消费线程的最小划分单位**。如果让多个线程同时消费同一个分区，打破了以分区为消费线程的最小划分单位，虽然这进一步提高了消费能力，
