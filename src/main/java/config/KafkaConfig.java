@@ -26,10 +26,13 @@ public class KafkaConfig {
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
         // 序列化
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, CompanySerializer.class.getName());
+//        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, CompanySerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
         // 用来设定 KafkaProducer 对应的客户端id
         // 如果客户端不设置，则 KafkaProducer 会自动生成一个非空字符串，内容形式如“producer-1”、“producer-2”
-        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "producer.client.id.demo");
+//        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "producer.client.id.demo");
+
         // 指定发送消息RecordAccumulator缓冲区的大小 默认32MB
         properties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432");
         // send最长的阻塞时间 默认60s
@@ -38,9 +41,10 @@ public class KafkaConfig {
         properties.put(ProducerConfig.RETRIES_CONFIG, 10);
 
         // 配置分区器
-        properties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, MyPartitioner.class.getName());
+//        properties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, MyPartitioner.class.getName());
+
         // 生产者拦截器
-        properties.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, MyProducerInterceptor.class.getName());
+//        properties.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, MyProducerInterceptor.class.getName());
 
         return properties;
     }
@@ -50,15 +54,22 @@ public class KafkaConfig {
 
         // 反序列化
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CompanyDeserializer.class.getName());
+//        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CompanyDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
+
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
+
         // 配置客户端ID
 //        properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "JD-Consumer-2");
+
         // 配置消费位移不自动提交
 //        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+
         // 配置找不到消费位移时从哪里开始消费
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+//        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
         // 配置消费者拦截器
 //        properties.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, MyConsumerInterceptor.class.getName());
 

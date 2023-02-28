@@ -295,6 +295,7 @@ listeners=PLAINTEXT://内网IP:9092
 advertised.listeners=PLAINTEXT://外网IP:9092
 ```
 
+- broker.id: 在集群情况下该值需要不同
 - zookeeper.connect: 该参数指明 broker 要连接的 ZooKeeper 集群的服务地址（包含端口号），没有默认值，且此参数为必填项
 - listeners: 该参数指明 broker 监听客户端连接的地址列表，即为客户端要连接 broker 的入口地址列表，
   protocol1://hostname1:port1,protocol2://hostname2:port2(协议://主机名:port，多个以逗号隔开)
