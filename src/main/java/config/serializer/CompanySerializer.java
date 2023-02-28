@@ -8,6 +8,9 @@ import org.apache.kafka.common.serialization.Serializer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * 序列化器（Serializer）把对象转换成字节数组才能通过网络发送给 Kafka
+ */
 @Slf4j
 public class CompanySerializer implements Serializer<Company> {
 

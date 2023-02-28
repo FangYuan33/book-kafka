@@ -8,6 +8,9 @@ import org.apache.kafka.common.serialization.Deserializer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * 消费者需要用反序列化器（Deserializer）把从 Kafka 中收到的字节数组转换成相应的对象
+ */
 @Slf4j
 public class CompanyDeserializer implements Deserializer<Company> {
     @Override

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * 生产者拦截器既可以用来在消息发送前做一些准备工作
  * 这3个方法中抛出的异常都会被捕获并记录到日志中，但并不会再向上传递
  */
 @Slf4j
