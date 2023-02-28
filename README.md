@@ -236,6 +236,9 @@ advertised.listeners=PLAINTEXT://外网IP:9092
 
 15. **max.in.flight.requests.per.connection**: 默认值为5，即在 `InFlightRequests` 中每个连接最多只能缓存5个未响应的请求
 
+16. **metadata.max.age.ms**: 超过该配置的时间时则会对元数据进行更新，默认300000ms，5分钟。
+    （原数据指Kafka集群的元数据，记录了集群中的哪些主题、主题有哪些分区，每个分区的Leader副本在哪个节点上，Follower副本在哪个节点上，哪些副本在AR、ISR等集合中）
+
 ### 消费者参数
 
 1. **fetch.min.bytes**: 配置 Consumer 在调用`poll()方法`中能从 `broker` 中拉取的最小数据量，默认值为1（B）。
