@@ -12,6 +12,19 @@
 每个主题可以有多个分区，多个分区可以分布在不同的 Broker 上，而每个分区又引入了多副本机制，通过增加副本数量来提高容灾能力。
 Leader副本负责处理读写请求，Follower副本只负责与Leader副本进行消息同步。图示中 Broker 节点数为4，某主题分区为3，副本因子也为3。
 
+### 生产者客户端的整体架构
+
+![img.png](image/chapter_05/img.png)
+
+整个生产者客户端由两个线程协调运行，这两个线程分别为主线程和 Sender 线程（发送线程）。在主线程中由 KafkaProducer 创建消息，
+然后通过可能的拦截器、序列化器和分区器的作用之后缓存到消息累加器（RecordAccumulator，也称为消息收集器）。
+
+在消息累加器中，发往各个不同分区的消息以 `ProducerBatch` 批量消息的形式保存在双向队列中，Sender 线程负责从消息累加器中获取消息并将其发送到 Kafka。
+因为消息在网络上都是以字节（Byte）的形式传输的，所以在线程中会对消息进行封装，封装成 `<Broker, Request>` 的形式，完成了应用层到I/O层的转换。
+
+这些Request请求在从 Sender 线程发往 Kafka 之前还会保存到 `InFlightRequests` ，它的主要作用是缓存了已经发出去但还没有收到响应的请求，
+能够通过参数配置最大的请求缓存数，以此来判断对应的 Broker 节点是否堆积了未响应的消息。
+
 ### chapter_16_17_18 主题和分区
 ![img.png](image/chapter_16/img.png)
 
@@ -123,66 +136,6 @@ Kafka支持点对点/发布订阅两种消费模式，消费组对主题的订�
 
 消费组的名称可以通过`group.id`来配置
 
-### chapter_05
-
-- 生产者客户端的整体架构
-
-![img.png](image/chapter_05/img.png)
-
-整个生产者客户端由两个线程协调运行，这两个线程分别为主线程和 Sender 线程（发送线程）。在主线程中由 KafkaProducer 创建消息，
-然后通过可能的拦截器、序列化器和分区器的作用之后缓存到消息累加器（RecordAccumulator，也称为消息收集器）中。
-
-Sender 线程负责从 RecordAccumulator 中获取消息并将其发送到 Kafka 中。RecordAccumulator 缓存的大小可以通过生产者客户端参数 buffer.memory 配置，默认值为 33554432B，即32MB。
-
-RecordAccumulator 主要用来缓存消息以便 Sender 线程可以批量发送，进而减少网络传输的资源消耗以提升性能。
-
-如果生产者发送消息的速度超过发送到服务器的速度，则会导致生产者空间不足，这个时候 KafkaProducer 的 send() 方法调用要么被阻塞，
-要么抛出异常，这个取决于参数 max.block.ms 的配置，此参数的默认值为60000，即60秒。
-
-![img_1.png](image/chapter_05/img_1.png)
-
-在 RecordAccumulator 的内部为每个分区都维护了一个双端队列，队列中的内容是ProducerBatch，消息写入缓存时，追加到双端队列的尾部；Sender 读取消息时，从双端队列的头部读取。
-
-![](image/chapter_05/ProducerBatch.jpg)
-
-ProducerBatch 中可以包含一至多个 ProducerRecord，
-ProducerRecord 是生产者中创建的消息，而 ProducerBatch 是指一个消息批次，ProducerRecord 会被包含在 ProducerBatch 中，
-这样可以使字节的使用更加紧凑。与此同时，将较小的 ProducerRecord 拼凑成一个较大的 ProducerBatch，也可以减少网络请求的次数以提升整体的吞吐量。
-
-消息在网络上都是以字节（Byte）的形式传输的，在发送之前需要创建一块内存区域来保存对应的消息。这一点我们在定义序列化器和反序列化器时可以发现。
-
-在 Kafka 生产者客户端中，通过 ByteBuffer 实现消息内存的创建和释放。 不过频繁的创建和释放是比较耗费资源的，
-在 RecordAccumulator 的内部还有一个 BufferPool，它主要用来实现 ByteBuffer 的复用，以实现缓存的高效利用。
-
-不过 BufferPool 只针对特定大小的 ByteBuffer 进行管理，而其他大小的 ByteBuffer 不会缓存进 BufferPool 中，
-这个特定的大小由 batch.size 参数来指定，默认值为16384B，即16KB。我们可以适当地调大 batch.size 参数以便多缓存一些消息。
-
-当一条消息（ProducerRecord）流入 RecordAccumulator 时，会先寻找与消息分区所对应的双端队列（如果没有则新建），
-再从这个双端队列的尾部获取一个 ProducerBatch（如果没有则新建），查看 ProducerBatch 中是否还可以写入这个 ProducerRecord，如果可以则写入，
-如果不可以则需要创建一个新的 ProducerBatch。在新建 ProducerBatch 时评估这条消息的大小是否超过 batch.size 参数的大小，
-如果不超过，那么就以 batch.size 参数的大小来创建 ProducerBatch，这样在使用完这段内存区域之后，可以通过 BufferPool 的管理来进行复用；
-如果超过，那么就以评估的大小来创建 ProducerBatch，这段内存区域不会被复用。
-
-![](image/chapter_05/sender.jpg)
-
-Sender 从 RecordAccumulator 中获取缓存的消息之后，会进行如上图所示的数据类型转换，由先前的`<分区, Deque<ProducerBatch>>`类型转换成
-`<Node, List< ProducerBatch>>`类型，其中Node为broker节点，相当于是做了从应用层到网络I/O层的转换，因为对于网络链接来说，它只关系需要
-发送的目的broker节点，并不关心应用层消息所在的分区。
-
-![](image/chapter_05/sender2.jpg)
-
-Sender之后还会对他进行一次封装，封装成<Node, Request>的形式，这样就更直观的展示了将Request发往各个Node的逻辑。
-
-![img_2.png](image/chapter_05/img_2.png)
-
-请求在从 Sender 线程发往 Kafka 之前还会保存到 InFlightRequests 中，InFlightRequests 保存对象的具体形式为 `Map<NodeId, Deque<InFlightRequest>>`，
-它的主要作用是缓存了已经发出去但还没有收到响应的请求（NodeId 是一个 String 类型，表示节点的 id 编号）
-
-对应的InFlightRequests注释
-> The set of requests which have been sent or are being sent but haven't yet received a response
-
-通过配置max.in.flight.requests. per. connection，默认为5，可以配置最多缓存的请求数。如果超过了这个数量，就不能再向这个连接发送更多的请求了。
-
 ---
 - 元数据的更新
 
@@ -274,6 +227,14 @@ advertised.listeners=PLAINTEXT://外网IP:9092
     注意这个参数需要比 broker 端参数 replica.lag.time.max.ms 的值要大，这样可以减少因客户端重试而引起的消息重复的概率。
 
 11. **enable.idempotence**: 是否开启幂等性功能
+
+12. **buffer.memory**: 指 `RecordAccumulator` 用来缓存生产者发送消息的最大大小
+
+13. **max.block.ms**: 如果生产者发送消息过快，当消息缓存大小超过 **buffer.memory** 的大小时，会进入阻塞状态，该参数表示阻塞的最长时间，超过该时间后抛出异常
+
+14. **batch.size**: `RecordAccumulator` 中 `ProducerBatch` 的标准大小，当消息小于该大小时，以该大小创建；否则以实际消息大小创建
+
+15. **max.in.flight.requests.per.connection**: 默认值为5，即在 `InFlightRequests` 中每个连接最多只能缓存5个未响应的请求
 
 ### 消费者参数
 
@@ -369,9 +330,12 @@ Kafka 借助 ISR 实现主从复制: 当其中副本有复制完成消息时更�
 
 
 
-#### Kafka 中的分区器、序列化器、拦截器是否了解？它们之间的处理顺序是什么？
+#### Kafka 中的拦截器、序列化器、分区器是否了解？它们之间的处理顺序是什么？
 
+拦截器、分区器、序列化器都是生产者在向 Broker 节点发送消息之前对消息进行处理的，拦截器可以用来在消息发送前做一些业务准备工作；
+序列化器是将消息对象转换成字节数组；而分区器则是确定这个消息发送到该主题的具体分区。
 
+它们的处理顺序是：拦截器、序列化器、分区器。
 
 #### Kafka 生产者客户端的整体结构是什么样子的？
 
@@ -379,7 +343,8 @@ Kafka 借助 ISR 实现主从复制: 当其中副本有复制完成消息时更�
 
 #### Kafka 生产者客户端中使用了几个线程来处理？分别是什么？
 
-
+使用了两个线程来进行处理，分别是主线程和Sender线程。在主线程中由 `KafkaProducer` 创建消息，然后通过可能存在的拦截器、序列化器和分区器的作用之后，
+缓存到消息累加器中；而Sender线程负责从消息累加器获取消息并将其发送到Kafka中。
 
 #### Kafka 的旧版 Scala 的消费者客户端的设计有什么缺陷？
 
