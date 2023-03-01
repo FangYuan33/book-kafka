@@ -231,11 +231,15 @@ advertised.listeners=PLAINTEXT://外网IP:9092
 
 15. **client.id**: 用来设定消费者的ID名称
 
+16. **enable.auto.commit**: 消费者位移是否自动提交，默认为 true
+
+17. **auto.commit.interval.ms**: 消费者位移自动提交的周期，默认5000ms
+
 ## 操作命令
 
-创建分区为4副本因子为3的话题
+创建分区为3副本因子为3的主题
 ```
-bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic topic-demo --replication-factor 3 --partitions 4
+bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic fang-yuan --replication-factor 3 --partitions 3
 ```
 
 展示主题的更多具体信息

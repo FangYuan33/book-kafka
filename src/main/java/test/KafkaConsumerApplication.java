@@ -25,13 +25,7 @@ public class KafkaConsumerApplication {
 
 //        testConsumeMessage(consumer, "fang-yuan");
 
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
-            for (ConsumerRecord<String, String> record : records) {
-                log.info("---处理业务逻辑---, {}, partition: {}", record.value(), record.partition());
-            }
-
-            log.info("---指定分区的消息 {} ---", records(records, new TopicPartition("jd", 1)));
-        }
+        consumedAndCommittedOffset(consumer, "fang-yuan");
     }
 
     /**
@@ -100,5 +94,32 @@ public class KafkaConsumerApplication {
         // 当然也可以直接指定从开始或从末尾开始消费
 //            realConsumer.seekToBeginning(assignment);
 //            realConsumer.seekToEnd(assignment);
+    }
+
+    /**
+     * 消费位移是已经消费的消息的偏移量
+     * 而提交位移是消费位移 + 1
+     */
+    private static <V> void consumedAndCommittedOffset(KafkaConsumer<String, V> consumer, String topic) {
+        consumer.subscribe(Collections.singleton(topic));
+
+        TopicPartition topicPartition = new TopicPartition(topic, 1);
+
+        // 拉取消息
+        ConsumerRecords<String, V> records = consumer.poll(Duration.ofMillis(10000));
+        // 获取指定主题分区的消息
+        List<ConsumerRecord<String, V>> partitionRecord = records.records(topicPartition);
+        // last record
+        ConsumerRecord<String, V> record = partitionRecord.get(partitionRecord.size() - 1);
+        // 同步提交消费位移
+        consumer.commitSync();
+        // 获取提交位移
+        OffsetAndMetadata committed = consumer.committed(topicPartition);
+        // 获取当前主题分区的偏移量
+        long position = consumer.position(topicPartition);
+
+        log.info("Consumed Offset: {}", record.partition());
+        log.info("Committed Offset: {}", committed.offset());
+        log.info("Next record Offset: {}", position);
     }
 }
