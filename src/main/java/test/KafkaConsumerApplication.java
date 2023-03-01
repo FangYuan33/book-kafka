@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 
@@ -20,16 +21,9 @@ public class KafkaConsumerApplication {
     public static void main(String[] args) {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(KafkaConfig.getConsumerProperties());
 
-        // 获取某主题的分区信息
-        List<PartitionInfo> jdTopicPartitionInfo = consumer.partitionsFor("jd");
-        log.info("主题 {} 的分区信息为 {}", "jd", jdTopicPartitionInfo);
+        partitionsFor(consumer, "fang-yuan");
 
-        TopicPartition topicPartition = new TopicPartition("jd", 0);
-        assignTopicPartition(consumer, topicPartition);
-
-        // 循环消费消息
-        while (true) {
-            seekToBeginOrEnd(consumer, consumer.assignment());
+//        testConsumeMessage(consumer, "fang-yuan");
 
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
             for (ConsumerRecord<String, String> record : records) {
@@ -38,6 +32,33 @@ public class KafkaConsumerApplication {
 
             log.info("---指定分区的消息 {} ---", records(records, new TopicPartition("jd", 1)));
         }
+    }
+
+    /**
+     * 测试消息的消费
+     */
+    private static <V> void testConsumeMessage(KafkaConsumer<String, V> consumer, String topic) {
+        consumer.subscribe(Collections.singleton(topic));
+
+        // 循环消费消息
+        while (true) {
+//            seekToBeginOrEnd(consumer, consumer.assignment());
+
+            ConsumerRecords<String, V> records = consumer.poll(Duration.ofMillis(1000));
+            for (ConsumerRecord<String, V> record : records) {
+                log.info("---处理业务逻辑---, {}, partition: {}", record.value(), record.partition());
+            }
+        }
+    }
+
+    /**
+     * 获取某主题的分区信息
+     */
+    private static <V> List<PartitionInfo> partitionsFor(KafkaConsumer<String, V> consumer, String topic) {
+        List<PartitionInfo> jdTopicPartitionInfo = consumer.partitionsFor(topic);
+        log.info("主题 {} 的分区信息为 {}", "jd", jdTopicPartitionInfo);
+
+        return jdTopicPartitionInfo;
     }
 
     /**

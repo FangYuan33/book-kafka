@@ -7,9 +7,12 @@ public class KafkaProducerApplication {
     public static void main(String[] args) {
         Producer<String, String> producerString = new Producer<>();
 
-        // 测试Kafka消息发布
-        ProducerRecord<String, String> record = new ProducerRecord<>("jd", "hello, Kafka!");
-        sendStringMessage(producerString, record);
+
+        for (int i = 0; i < 2; i++) {
+            // 测试Kafka消息发布
+            ProducerRecord<String, String> record = new ProducerRecord<>("fang-yuan", "Hello, Kafka", "hello, Kafka!" + i);
+            sendStringMessage(producerString, record);
+        }
     }
 
     /**
