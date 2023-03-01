@@ -6,10 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,8 +20,12 @@ public class KafkaConsumerApplication {
     public static void main(String[] args) {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(KafkaConfig.getConsumerProperties());
 
+        // 获取某主题的分区信息
+        List<PartitionInfo> jdTopicPartitionInfo = consumer.partitionsFor("jd");
+        log.info("主题 {} 的分区信息为 {}", "jd", jdTopicPartitionInfo);
+
         TopicPartition topicPartition = new TopicPartition("jd", 0);
-        consumer.assign(Collections.singleton(topicPartition));
+        assignTopicPartition(consumer, topicPartition);
 
         // 循环消费消息
         while (true) {
@@ -33,9 +39,24 @@ public class KafkaConsumerApplication {
     }
 
     /**
+     * assign 订阅主题的分区进行消费
+     */
+    private static <V> void assignTopicPartition(KafkaConsumer<String, V> consumer, TopicPartition topicPartition) {
+        consumer.assign(Collections.singleton(topicPartition));
+    }
+
+    /**
+     * subscribe 订阅主题，具有消费者自动再均衡的动能，也就是说 多个消费者情况下可以根据分区分配策略自动分配各个消费者与分区的关系
+     * 当消费组内的消费者增加或减少时，分区分配关系会自动调整，保证消费的负载均衡和故障自动转移
+     */
+    private static <V> void subscribeTopic(KafkaConsumer<String, V> consumer, String topic) {
+        consumer.subscribe(Collections.singletonList(topic));
+    }
+
+    /**
      * 指定从分区头或分区尾进行消费
      */
-    private static void seekToBeginOrEnd(KafkaConsumer<String, String> realConsumer, Set<TopicPartition> assignment) {
+    private static <V> void seekToBeginOrEnd(KafkaConsumer<String, V> realConsumer, Set<TopicPartition> assignment) {
         // 获取的消息将写入的位置
         Map<TopicPartition, Long> endOffsets = realConsumer.endOffsets(assignment);
         // 获取消息开始的位置
