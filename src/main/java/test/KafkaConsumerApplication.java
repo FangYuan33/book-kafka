@@ -35,6 +35,8 @@ public class KafkaConsumerApplication {
             for (ConsumerRecord<String, String> record : records) {
                 log.info("---处理业务逻辑---, {}, partition: {}", record.value(), record.partition());
             }
+
+            log.info("---指定分区的消息 {} ---", records(records, new TopicPartition("jd", 1)));
         }
     }
 
@@ -51,6 +53,13 @@ public class KafkaConsumerApplication {
      */
     private static <V> void subscribeTopic(KafkaConsumer<String, V> consumer, String topic) {
         consumer.subscribe(Collections.singletonList(topic));
+    }
+
+    /**
+     * 从已经拉取到的消息中，拿出指定分区的消息
+     */
+    private static <V> List<ConsumerRecord<String, V>> records(ConsumerRecords<String, V> records, TopicPartition partition) {
+        return records.records(partition);
     }
 
     /**
