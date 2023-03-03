@@ -80,8 +80,13 @@ public class KafkaConsumerApplication {
     /**
      * 指定从分区头或分区尾进行消费
      */
-    private static <V> void seekToBeginOrEnd(KafkaConsumer<String, V> realConsumer, Set<TopicPartition> assignment) {
-        // 获取的消息将写入的位置
+    private static <V> void seekToBeginOrEnd(KafkaConsumer<String, V> realConsumer) {
+        // 执行 poll() 方法之后，消费者才会分配到主题的分区
+        realConsumer.poll(Duration.ofMillis(1000));
+        // 获取被分配的主题分区
+        Set<TopicPartition> assignment = realConsumer.assignment();
+
+        // 获取的消息将写入的位置，即分区尾
         Map<TopicPartition, Long> endOffsets = realConsumer.endOffsets(assignment);
         // 获取消息开始的位置
         Map<TopicPartition, Long> beginningOffsets = realConsumer.beginningOffsets(assignment);
@@ -94,6 +99,8 @@ public class KafkaConsumerApplication {
         // 当然也可以直接指定从开始或从末尾开始消费
 //            realConsumer.seekToBeginning(assignment);
 //            realConsumer.seekToEnd(assignment);
+        // 指定分区和时间点进行消费
+//        realConsumer.offsetsForTimes();
     }
 
     /**

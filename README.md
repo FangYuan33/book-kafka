@@ -56,33 +56,6 @@ KafkaConsumer**不是线程安全的**，在执行公用方法的时候会调用
 
 **消费者拦截器**拦截的点位：**在poll方法返回消息之前**和**提交消费位移之后**，实例看`MyConsumerInterceptor`
 
-### chapter_12 指定位移消费
-
-在 Kafka 中每当消费者查找不到记录的消费位移时，就会根据消费者客户端参数 **auto.offset.reset** 的配置来决定从何处开始进行消费，
-这个参数的默认值为`latest`，表示从分区末尾开始消费消息，如下图所示，默认从9开始拉取消息进行消费，如果配置成`earliest`，那么从0开始消费
-
-![img.png](image/chapter_12/img.png)
-
-相反，如果能找到对应的消费位移，那么这个配置就没啥用。或者当我们指定的消费位移超出了该分区的位移范围，这个参数也会生效。
-
-我们可以使用`seek方法`来对指定分分区具体的位移处的消息进行消费。
-
-`Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions)` 获取到的位置不是上图中的8而是9
-
-`Map<TopicPartition, Long> beginningOffsets(Collection<TopicPartition> partitions)` 获取消息开始的位置
-
-通过如上两个方法，可以根据获取到的每个分区的偏移量来选择从分区头还是从分区尾进行消费，或者更直接的选择`seekToBeginning`和`seekToEnd`方法。
-
----
-
-当然还有一种更加符合业务逻辑的指定位移消费的方式
-
-`Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes(Map<TopicPartition, Long> timestampsToSearch)`
-
-可以通过这个方法来获取到指定分区的对应时间戳的消费位移，获取到消费位移后，再调用seek方法，便可以消费具体时间的处的消费位移的消息了
-
-到这里我们可以知道，只要有了消费位移那么我们就可以`随意`消费消息，如果我们把对应的消费位移保存到数据库或者缓存中，那么灵活性和可用性就高的多了！
-
 ### chapter_11
 
 消费者消费完消息后，会对消费位移进行提交。如下图，消费完x位置的消息后，提交的位移为x + 1，而不是x。
@@ -239,6 +212,8 @@ advertised.listeners=PLAINTEXT://外网IP:9092
 16. **enable.auto.commit**: 消费者位移是否自动提交，默认为 true
 
 17. **auto.commit.interval.ms**: 消费者位移自动提交的周期，默认5000ms
+
+18. **auto.offset.reset**: 消费者找不到消费位移时，默认为 `latest`，从分区末尾开始消费；`earliest` 从分区开始进行消费；`none` 则会抛出异常
 
 ## 操作命令
 
