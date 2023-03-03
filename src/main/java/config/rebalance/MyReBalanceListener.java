@@ -8,14 +8,14 @@ import org.apache.kafka.common.TopicPartition;
 import java.util.Collection;
 
 /**
- * 再均衡器，消费组中有消费者加入或者删除消费者时进行再均衡动作
+ * 当主题分区的所属权从一个消费者转移到另一个消费者的行为是再均衡，此时会触发再均衡器的执行逻辑
  */
 @Slf4j
-public class MyRebalanceListener<K, V> implements ConsumerRebalanceListener {
+public class MyReBalanceListener<K, V> implements ConsumerRebalanceListener {
 
-    private KafkaConsumer<K, V> consumer;
+    private final KafkaConsumer<K, V> consumer;
 
-    public MyRebalanceListener(KafkaConsumer<K, V> consumer) {
+    public MyReBalanceListener(KafkaConsumer<K, V> consumer) {
         this.consumer = consumer;
     }
 
