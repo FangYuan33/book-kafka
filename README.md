@@ -12,6 +12,12 @@
 每个主题可以有多个分区，多个分区可以分布在不同的 Broker 上，而每个分区又引入了多副本机制，通过增加副本数量来提高容灾能力。
 Leader副本负责处理读写请求，Follower副本只负责与Leader副本进行消息同步。图示中 Broker 节点数为4，某主题分区为3，副本因子也为3。
 
+![img_2.png](img_2.png)
+
+**主题**、**分区**、**副本**和 **Log（日志）** 的关系如上图所示，主题和分区是逻辑上的存在，副本日志文件才是实际物理上的存在，
+同一个分区中的多个副本**必须**分布在不同的 broker 中，这样才能提供有效的数据冗余和可靠性保证。主题的分区数支持增加，但不支持减少。
+增加分区数时需要注意带有key值的消息会被重新分区，因此可能会产生消息顺序错乱和重复消费的问题，所以需要尽量避免增加分区数。
+
 ### 生产者客户端的整体架构
 
 ![img.png](image/chapter_05/img.png)
@@ -39,30 +45,9 @@ Leader副本负责处理读写请求，Follower副本只负责与Leader副本进
 
 消费者拦截器对消息处理的时机：**poll()方法拉取消息返回之前**和**提交完消费位移之后**
 
-### chapter_16_17_18 主题和分区
-![img.png](image/chapter_16/img.png)
-
-**主题**、**分区**、**副本和 Log（日志）**的关系如上图所示，**主题和分区都是提供给用户的抽象**，**实际物理上的存在是 Log**。
-同一个分区中的多个副本必须分布在不同的 broker 中，这样才能提供**有效的数据冗余**。
-
-Kafka**支持主题修改增加分区数**，但是此时需要注意有key值的消息，会在分区数增加后重新分区，比如开始在1分区的消息，
-可能在根据key来计算分区号后而发往其他分区。但是**不支持减少分区数**。
-
-### chapter_14 消费者的多线程实现
-
-一般而言，**分区是消费线程的最小划分单位**。如果让多个线程同时消费同一个分区，打破了以分区为消费线程的最小划分单位，虽然这进一步提高了消费能力，
-但是，这种方式对于消费位移的提交和顺序控制会变得很复杂，应用中用的比较少。
-
-KafkaConsumer**不是线程安全的**，在执行公用方法的时候会调用`acquire方法`，这个方法它是一个轻量级锁，通过线程计数标记来检测是否发生了并发操作，
-以此来保证只有一个线程在操作。
-
-### chapter_13 消费者分区再均衡和消费者拦截器
-
-**消费者拦截器**拦截的点位：**在poll方法返回消息之前**和**提交消费位移之后**，实例看`MyConsumerInterceptor`
-
 ## 参数配置
 
-### Linux配置文件
+### Broker配置文件参数
 
 在远程Linux上配置
 ```xml
@@ -71,20 +56,22 @@ listeners=PLAINTEXT://内网IP:9092
 advertised.listeners=PLAINTEXT://外网IP:9092
 ```
 
-- broker.id: 在集群情况下该值需要不同
-- zookeeper.connect: 该参数指明 broker 要连接的 ZooKeeper 集群的服务地址（包含端口号），没有默认值，且此参数为必填项
-- listeners: 该参数指明 broker 监听客户端连接的地址列表，即为客户端要连接 broker 的入口地址列表，
+- **broker.id**: 在集群情况下该值需要不同
+- **zookeeper.connect**: 该参数指明 broker 要连接的 ZooKeeper 集群的服务地址（包含端口号），没有默认值，且此参数为必填项
+- **listeners**: 该参数指明 broker 监听客户端连接的地址列表，即为客户端要连接 broker 的入口地址列表，
   protocol1://hostname1:port1,protocol2://hostname2:port2(协议://主机名:port，多个以逗号隔开)
-- advertised.listeners: 公有云上的机器通常配备有多块网卡，即包含私网网卡和公网网卡，对于这种情况而言，
+- **advertised.listeners**: 公有云上的机器通常配备有多块网卡，即包含私网网卡和公网网卡，对于这种情况而言，
   可以设置 advertised.listeners 参数绑定公网IP供外部客户端使用，而配置 listeners 参数来绑定私网IP地址供 broker 间通信使用。
-- broker.id: 指定 Kafka 集群中 broker 的唯一标识
-- log.dir和log.dirs: Kafka 把所有的消息都保存在磁盘上，而这两个参数用来配置 Kafka 日志文件存放的根目录。一般情况下，log.dir 用来配置单个根目录，
+- **log.dir**和**log.dirs**: Kafka 把所有的消息都保存在磁盘上，而这两个参数用来配置 Kafka 日志文件存放的根目录。一般情况下，log.dir 用来配置单个根目录，
   而 log.dirs 用来配置多个根目录（以逗号分隔），但是 Kafka 并没有对此做强制性限制，也就是说，log.dir 和 log.dirs 都可以用来配置单个或多个根目录。
   log.dirs 的优先级比 log.dir 高，但是如果没有配置 log.dirs，则会以 log.dir 配置为准。默认情况下只配置了 log.dir 参数，其默认值为 /tmp/kafka-logs。
-- message.max.bytes: 该参数用来指定 broker 所能接收消息的最大值，默认值为1000012（B），约等于976.6KB。
+- **message.max.bytes**: 该参数用来指定 broker 所能接收消息的最大值，默认值为1000012（B），约等于976.6KB。
   如果 Producer 发送的消息大于这个参数所设置的值，那么（Producer）就会报出 RecordTooLargeException 的异常。
   如果需要修改这个参数，那么还要考虑 max.request.size（客户端参数）、max.message.bytes（topic端参数）等参数的影响。
   为了避免修改此参数而引起级联的影响，建议在修改此参数之前考虑分拆消息的可行性。
+- **auto.create.topics.enable**: 默认值为true，生产者向一个尚未创建的主题发送消息时，会自动创建一个分区数为**num.partitions**（默认1），
+  副本因子为**default.replication.factor**（默认1）的主题；当消费者从未知主题中读取消息时，也会自动创建主题，所以该参数不建议为true
+- **delete.topic.enable**: 默认为true且为true时才能删除主题
 
 ### 生产者参数
 
