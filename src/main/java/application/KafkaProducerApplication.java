@@ -1,4 +1,4 @@
-package test;
+package application;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import producer.Producer;

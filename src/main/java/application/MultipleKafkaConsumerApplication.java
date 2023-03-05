@@ -1,4 +1,4 @@
-package test;
+package application;
 
 import config.KafkaConfig;
 import lombok.extern.slf4j.Slf4j;

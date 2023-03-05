@@ -1,6 +1,5 @@
-package test;
+package application;
 
-import com.alibaba.fastjson.JSON;
 import config.KafkaConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
