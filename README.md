@@ -1,6 +1,6 @@
 # [《图解 Kafka 之实战指南》](https://s.juejin.cn/ds/YsX42xu/)
 
-## 1. 初识Kafka
+## 初识Kafka
 
 `Kafka` 是用 `Scala` 语言开发的一个**多分区、多副本**且基于 `zookeeper` 协调的**分布式消息系统**。它可以作为**消息系统**、**存储系统**和**流式处理平台**。
 典型的`Kafka`体系中包含三种角色，Broker作为服务节点，Producer 作为生产者发送消息，Consumer 作为消费者从 Broker 拉取消息进行消费

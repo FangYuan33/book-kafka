@@ -4,6 +4,7 @@ import config.deserializer.CompanyDeserializer;
 import config.interceptor.MyConsumerInterceptor;
 import config.interceptor.MyProducerInterceptor;
 import config.partitioner.MyPartitioner;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -76,4 +77,15 @@ public class KafkaConfig {
         return properties;
     }
 
+    /**
+     * 获取Kafka Admin配置参数
+     */
+    public static Properties getAdminProperties() {
+        Properties properties = new Properties();
+
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
+        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+
+        return properties;
+    }
 }
