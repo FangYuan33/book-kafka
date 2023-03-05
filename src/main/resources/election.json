@@ -1,0 +1,16 @@
+{
+  "partitions":[
+    {
+      "partition":0,
+      "topic":"test-admin"
+    },
+    {
+      "partition":1,
+      "topic":"test-admin"
+    },
+    {
+      "partition":2,
+      "topic":"test-admin"
+    }
+  ]
+}
