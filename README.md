@@ -32,6 +32,34 @@ Kafka使用**优先副本**来治理分区负载失衡，优先副本是AR集合
 
 执行命令: `bin/kafka-preferred-replica-election.sh --zookeeper localhost:2181 --path-to-json-file election.json`
 
+#### 分区重分配
+
+集群中新增 broker 节点时，将之前已经完成分配的分区进行重分配以均衡负载或者计划下线节点时，用于保证分区及副本的合理分配。
+它的原理是先从leader分区副本复制，增加的新副本到要被分配到的broker节点，复制完成后，将旧副本从副本清单内移除。
+
+##### 步骤
+
+将 `topic-reassign` 主题在0,2节点上进行分区重分配
+
+1. 创建 `reassign.json` 文件
+
+```json
+{
+        "topics":[
+                {
+                        "topic":"topic-reassign"
+                }
+        ],
+        "version":1
+}
+```
+
+2. 执行脚本: `bin/kafka-reassign-partitions.sh --zookeeper localhost:2181/kafka --generate --topics-to-move-json-file reassign.json --broker-list 0,2`
+
+执行结果为重分区方案，将其保存到 `project.json` 文件中
+
+3. 执行脚本: `bin/kafka-reassign-partitions.sh --zookeeper localhost:2181/kafka --execute --reassignment-json-file project.json`
+
 ### 生产者客户端的整体架构
 
 ![img.png](image/chapter_05/img.png)
